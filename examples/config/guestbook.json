@@ -1,4 +1,7 @@
 {
+  "id": "guestbook",
+  "kind": "Config",
+  "apiVersion": "v1beta1",
   "services": [
     {
       "id": "frontend",

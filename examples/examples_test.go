@@ -48,6 +48,16 @@ func validateObject(obj interface{}) (errors []error) {
 		for i := range t.Items {
 			errors = append(errors, validateObject(&t.Items[i])...)
 		}
+	case *api.Config:
+		for service := range t.Services {
+			errors = append(errors, validateObject(&service)...)
+		}
+		for pods := range t.Pods {
+			errors = append(errors, validateObject(&pods)...)
+		}
+		for replicationController := range t.ReplicationControllers {
+			errors = append(errors, validateObject(&replicationController)...)
+		}
 	default:
 		return []error{fmt.Errorf("no validation defined for %#v", obj)}
 	}
@@ -147,6 +157,26 @@ func TestExamples(t *testing.T) {
 	}
 	if tested != len(expected) {
 		t.Errorf("Expected %d examples, Got %d", len(expected), tested)
+	}
+}
+
+func TestConfig(t *testing.T) {
+	path := "../examples/config/guestbook.json"
+	glog.Infof("Testing %s", path)
+
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		t.Fatalf("Unable to read file: %v", err)
+	}
+
+	expectedType := &api.Config{}
+
+	if err := api.DecodeInto(data, expectedType); err != nil {
+		t.Errorf("%s did not decode correctly: %v\n%s", path, err, string(data))
+		return
+	}
+	if errors := validateObject(expectedType); len(errors) > 0 {
+		t.Errorf("%s did not validate correctly: %v", path, errors)
 	}
 }
 
